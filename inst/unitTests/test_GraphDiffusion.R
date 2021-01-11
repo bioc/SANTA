@@ -9,20 +9,20 @@ test_GraphDiffusion <- function() {
     # 7) returns the correct results on a small test graph
     
     # setup
-    g.single <- graph.empty(1, directed=F)
+    g.single <- graph.empty(1, directed=FALSE)
     
     edge.attr.weight <- "weight"
     edges <- c(1,4, 1,8, 1,9, 1,10, 1,11, 2,5, 2,6, 2,9, 3,7, 3,10, 3,12, 4,2, 4,8, 4,11, 5,3, 5,6, 5,9, 6,9, 7,10, 7,11, 7,12, 8,11, 9,10, 10,12) 
     weights <- rep(1, length(edges) / 2)
     weights[c(2, 7, 13, 16, 18, 22)] <- 0.1 # move 8 and 6 away
-    g <- graph.empty(max(edges), directed=F)
+    g <- graph.empty(max(edges), directed=FALSE)
     g <- add.edges(g, edges)
     g <- set.edge.attribute(g, edge.attr.weight, value=weights)
     g.unnamed <- g
     g.named <- set.vertex.attribute(g, "name", value=paste("gene", 1:vcount(g), sep=""))
     
     n.vertex.unconnected <- 10
-    g.unconnected <- graph.empty(n.vertex.unconnected, directed=F)
+    g.unconnected <- graph.empty(n.vertex.unconnected, directed=FALSE)
     
     v <- c(4,2,12)
     

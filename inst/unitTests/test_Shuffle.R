@@ -6,17 +6,17 @@ test_Shuffle <- function() {
     
     for (i in 1:n.trials) {
         # check that function ingores certain values
-        ignore1 <- c(F, T, F, T, F)
+        ignore1 <- c(FALSE, TRUE, FALSE, TRUE, FALSE)
         res1 <- SANTA:::Shuffle(x, ignore=ignore1)
         checkEquals(x[ignore1], res1[ignore1])
         
         # check that function can ignore all values
-        ignore2 <- c(T, T, T, T, T)
+        ignore2 <- rep(TRUE, 5)
         res2 <- SANTA:::Shuffle(x, ignore=ignore2)
         checkEquals(x[ignore2], res2[ignore2])
         
         # check that function handles NAs
-        ignore3 <- c(F, T, F, T, F)
+        ignore3 <- c(FALSE, TRUE, FALSE, TRUE, FALSE)
         res3 <- SANTA:::Shuffle(x.na, ignore=ignore3)
         checkEquals(x.na[ignore3], res3[ignore3])
     }

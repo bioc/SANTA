@@ -14,11 +14,11 @@ Knode <- function(
     dist.method <- match.arg(dist.method)
     g <- CheckAttributes(g, vertex.attr, edge.attr, verbose) # check that vertex weights and edge distances are present and suitable
     nvertices <- as.integer(vcount(g))
-    if (is.null(get.vertex.attribute(g, "name"))) g <- set.vertex.attribute(g, "name", value=as.character(1:nvertices)) # if vertices do not have a name, add some
+    if (is.null(get.vertex.attribute(g, "name"))) g <- set.vertex.attribute(g, "name", value=as.character(seq_len(nvertices))) # if vertices do not have a name, add some
     
     # compute D and B if required
     if (is.null(B)) {
-        D <- DistGraph(g, edge.attr=edge.attr, dist.method=dist.method, correct.inf=T, correct.factor=correct.factor, verbose=verbose) # compute the vertex pair distances (D)
+        D <- DistGraph(g, edge.attr=edge.attr, dist.method=dist.method, correct.inf=TRUE, correct.factor=correct.factor, verbose=verbose) # compute the vertex pair distances (D)
         B <- BinGraph(D, nsteps=nsteps, verbose=verbose) # compute which bin each vertex pair distance falls into (B)
         rm(D)
     } else {
@@ -36,17 +36,17 @@ Knode <- function(
     
     # compute the Knode scores for each of the vertex attributes in vertex.attr
     for (attr in vertex.attr) {
-        if (verbose) message("running on vertex attribute ", which(vertex.attr == attr), "/", length(vertex.attr), "... ", appendLF=F)
+        if (verbose) message("running on vertex attribute ", which(vertex.attr == attr), "/", length(vertex.attr), "... ", appendLF=FALSE)
         
         # extract the vertex weights, set any missing weights to the mean
         vertex.weights <- get.vertex.attribute(g, attr)
-        vertex.weights[is.na(vertex.weights)] <- mean(vertex.weights, na.rm=T)
+        vertex.weights[is.na(vertex.weights)] <- mean(vertex.weights, na.rm=TRUE)
         vertex.weights <- as.double(vertex.weights)
         
         # compute nodeAUKs
         nodeAUK <- .Call("computenodeAUK", Bv, vertex.weights, nvertices, maxB)
         names(nodeAUK) <- get.vertex.attribute(g, "name")
-        res[[attr]] <- nodeAUK[order(nodeAUK, runif(length(nodeAUK)), decreasing=T)] # sort the Knode scores
+        res[[attr]] <- nodeAUK[order(nodeAUK, runif(length(nodeAUK)), decreasing=TRUE)] # sort the Knode scores
         
         if (verbose) message("done")
     }

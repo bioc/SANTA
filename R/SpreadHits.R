@@ -16,7 +16,7 @@ SpreadHits <- function(
     
     # setup
     dist.method <- match.arg(dist.method)
-    if (class(g) != "igraph") stop("g is not a graph")
+    if (!is(g, "igraph")) stop("g is not a graph")
     if (h * clusters > vcount(g)) stop("too few vertices on network to apply this many hits")
     if (lambda < 0) stop("lambda needs to be greater than or equal to 0")
     
@@ -25,31 +25,31 @@ SpreadHits <- function(
     D.cutoff <- D >= distance.cutoff
       
     # identify the seed vertices
-    seed.flag <- F
+    seed.flag <- FALSE
     attempt.number <- 0
     while (!seed.flag & attempt.number < attempts) {
         # for a certain maximum number of attempt, try to find a suitable number of seed vertices distant appart
         attempt.number <- attempt.number + 1
-        potential.seed <- rep(T, vcount(g))
+        potential.seed <- rep(TRUE, vcount(g))
         seeds <- rep(NA, clusters)
         seeds[1] <- sample(vcount(g), 1)
         
         # try to identify seeds that are suitable distant
-        while (!all(potential.seed == F) & !all(!is.na(seeds))) {
+        while (!all(potential.seed == FALSE) & !all(!is.na(seeds))) {
             seeds.chosen <- sum(!is.na(seeds))
-            potential.seed <- if (seeds.chosen == 1) D.cutoff[seeds[seeds.chosen], ] else apply(D.cutoff[seeds[1:seeds.chosen], ], 2, all)
+            potential.seed <- if (seeds.chosen == 1) D.cutoff[seeds[seeds.chosen], ] else apply(D.cutoff[seeds[seq_len(seeds.chosen)], ], 2, all)
             if (!all(!potential.seed)) seeds[seeds.chosen + 1] <- sample(which(potential.seed), 1)
         }
         
         # if enough hits have been chosen, proceed
-        if (all(!is.na(seeds))) seed.flag <- T
+        if (all(!is.na(seeds))) seed.flag <- TRUE
     }
     if (!seed.flag) warning("seed vertices not identified")
     
     if (seed.flag) {
         # spread hits over the network, starting from each seed
         hits <- list()
-        for (cluster in 1:clusters) {
+        for (cluster in seq_len(clusters)) {
             # spread the hits across the graph, probability determined by distance from the start vertex
             prob <- if (lambda > 0) lambda ^ - D[seeds[cluster], ] else rep(1, ncol(D))
             if (sum(prob > 1) > 0) prob <- prob / max(prob) # ensure that no probability are greater than 1
@@ -64,8 +64,8 @@ SpreadHits <- function(
         # add the hits and colour to the network
         hit.weights <- rep(0, vcount(g))
         color <- rep("grey", vcount(g))
-        hit.weights[1:vcount(g) %in% unlist(hits)] <- 1
-        color[1:vcount(g) %in% unlist(hits)] <- hit.color
+        hit.weights[seq_len(vcount(g)) %in% unlist(hits)] <- 1
+        color[seq_len(vcount(g)) %in% unlist(hits)] <- hit.color
         g <- set.vertex.attribute(g, name="hits", value=hit.weights)
         g <- set.vertex.attribute(g, name="color", value=color)
     } 

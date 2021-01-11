@@ -60,4 +60,10 @@ test_Knet <- function() {
     # Knet outputs a list of results, some of which equal NA, when one attribute and no permutations are completed
     suppressMessages(res8 <- Knet(g, nperm=0, vertex.attr="vweights1", edge.attr="eweights1"))
     checkTrue(all(is.na(res8[c("pval", "K.perm", "AUK.perm", "K.quan")])))
+    
+#     # test that parallel computing works
+#     # commented out as it needs to be run on a computer where parallel computing is available
+#     suppressMessages(res9 <- Knet(g, nperm=100, vertex.attr="vweights1", parallel=4))
+#     checkEquals(res9$AUK.obs, 0.3)
+#     checkEquals(round(res9$nodeAUK, 10), c(0.25, 0.05, 0.05, 0.35, 0.15))
 }

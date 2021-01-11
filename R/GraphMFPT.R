@@ -9,15 +9,15 @@ GraphMFPT <- function(
     # this function will return Inf distances if the graph is not connected
     # any edge attribute specified should be the weight of the edge (higher weights -> more significant) not the distance
     
-    if (class(v) != "igraph.vs") v <- AsiGraph(v, g) # if v is not an igraph-class object, convert
+    if (!is(v, "igraph.vs")) v <- AsiGraph(v, g) # if v is not an igraph-class object, convert
         
     # obtain the sparse unamed adjacency matrix
-    adj <- get.adjacency(g, attr=edge.attr.weight, names=F, sparse=T, type="both")
+    adj <- get.adjacency(g, attr=edge.attr.weight, names=FALSE, sparse=TRUE, type="both")
     
     # compute the distance matrix for each of the connected clusters of vertices
     D <- array(Inf, dim=rep(vcount(g), 2))
     c <- clusters(g) 
-    for (i in 1:c$no) {
+    for (i in seq_len(c$no)) {
         indices <- which(c$membership == i)
         D[indices, indices] <- MFPTfct(adj[indices, indices])
     }
@@ -48,5 +48,5 @@ MFPTfct <- function(
     I <- Diagonal(x=rep(as.integer(1), ngenes))
     pi <- as.numeric(rep(1/ngenes, ngenes) %*% solve(I - A + 1 / ngenes)) # pi: the stationary distribution of the transition matrix
     Z <- solve(t(t(I - A) - pi))
-    as.matrix(t(t(I - Z) + Z[cbind(1:nrow(Z), 1:nrow(Z))]) %*% (I * (1 / pi))) # M: the mean first passage matrix
+    as.matrix(t(t(I - Z) + Z[cbind(seq_len(nrow(Z)), seq_len(nrow(Z)))]) %*% (I * (1 / pi))) # M: the mean first passage matrix
 }

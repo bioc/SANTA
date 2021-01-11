@@ -59,7 +59,7 @@ Knet <- function(
  	    # run permutations
             res[[attr]]$K.perm <- list()
 	    for (i in seq_len(nperm)) res[[attr]]$K.perm[[i]] <- .Call("computenetK_fewzeros", Bv, Shuffle(vertex.weights, ignore=vertex.weights.is.na), nvertices, maxB)
-	    res[[attr]]$K.perm <- do.call("cbind", res[[attr]]$K.perm)
+	    res[[attr]]$K.perm <- do.call("rbind", res[[attr]]$K.perm)
             
             # calculate the quantiles, AUK and p-values (through the z-score) for the permutations
             res[[attr]]$K.quan <- apply(res[[attr]]$K.perm, 1, function(x) quantile(x, prob=prob))

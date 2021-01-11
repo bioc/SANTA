@@ -11,8 +11,8 @@ DistGraph <- function(
     # the attribute specified by edge.attr should represent edge distances
     
     method <- match.arg(dist.method)
-    if (verbose) message("computing graph distance matrix... ", appendLF=F)
-    if (class(v) != "igraph.vs") v <- AsiGraph(v, g) # if v is not an igraph object, convect
+    if (verbose) message("computing graph distance matrix... ", appendLF=FALSE)
+    if (!is(v, "igraph.vs")) v <- AsiGraph(v, g) # if v is not an igraph object, convect
     
     # convert the distances to weights
     if (is.null(edge.attr)) {
@@ -28,13 +28,13 @@ DistGraph <- function(
     # the distance matrix D contains a row for each vertex in v and a column for each vertex in g
     D <- switch(method,
                 shortest.paths = shortest.paths(g, v=v, weights=distances),			
-                diffusion      = GraphDiffusion(g, v=v, edge.attr.weight=edge.attr.weight, correct.neg=T),
-                mfpt           = GraphMFPT(g, v=v, edge.attr.weight=edge.attr.weight, average.distances=T)
+                diffusion      = GraphDiffusion(g, v=v, edge.attr.weight=edge.attr.weight, correct.neg=TRUE),
+                mfpt           = GraphMFPT(g, v=v, edge.attr.weight=edge.attr.weight, average.distances=TRUE)
     )
     if (sum(is.na(D)) > 0) warning("NA values returned in D")
     
     # if there are unconnected vertex pairs, the function changes the distance to twice the maximum finite distance.
-    if (correct.inf) D[!is.finite(D)] <- correct.factor * max(D[is.finite(D)], na.rm=T)
+    if (correct.inf) D[!is.finite(D)] <- correct.factor * max(D[is.finite(D)], na.rm=TRUE)
     
     # change column names and row names to the names of the specified vertices
     if (is.null(rownames(D))) rownames(D) <- v$name

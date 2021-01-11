@@ -2,7 +2,7 @@ test_CheckAttributes <- function() {
     # test that CheckAttributes produces an error if not all vertex attributes present on graph
     g <- erdos.renyi.game(10, 0.5)
     g <- set.vertex.attribute(g, name="attr1", value=runif(vcount(g)))
-    checkException(res <- SANTA:::CheckAttributes(g, vertex.attr=c("attr1", "attr2")), silent=T)
+    checkException(res <- SANTA:::CheckAttributes(g, vertex.attr=c("attr1", "attr2")), silent=TRUE)
     g <- remove.vertex.attribute(g, "attr1")
     
     # test that CheckAttributes successfully converts non-numeric vertex weights
@@ -14,7 +14,7 @@ test_CheckAttributes <- function() {
     g <- remove.vertex.attribute(g, "vertex.attr")
     
     # test that Check Attributes successfully converts logical vertex weights
-    values <- c(T, T, T, T, F, F, F, F, T, T)
+    values <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE)
     g <- set.vertex.attribute(g, name="vertex.attr", value=values)
     suppressWarnings(suppressMessages(g <- SANTA:::CheckAttributes(g, vertex.attr="vertex.attr")))
     checkEquals(get.vertex.attribute(g, name="vertex.attr"), c(1, 1, 1, 1, 0, 0, 0, 0, 1, 1))
@@ -31,14 +31,14 @@ test_CheckAttributes <- function() {
     values <- runif(vcount(g))
     values[1] <- "a"
     g <- set.vertex.attribute(g, name="vertex.attr", value=values)
-    checkException(SANTA:::CheckAttributes(g, vertex.attr="vertex.attr"), silent=T)
+    checkException(SANTA:::CheckAttributes(g, vertex.attr="vertex.attr"), silent=TRUE)
     g <- remove.vertex.attribute(g, "vertex.attr")
     
     # test that CheckAttributes produces an error if not all vertex weights are greater or equal to 0
     values <- runif(vcount(g))
     values[1] <- -1
     g <- set.vertex.attribute(g, name="vertex.attr", value=values)
-    checkException(res <- SANTA:::CheckAttributes(g, vertex.attr="vertex.attr"), silent=T)
+    checkException(res <- SANTA:::CheckAttributes(g, vertex.attr="vertex.attr"), silent=TRUE)
     g <- remove.vertex.attribute(g, "vertex.attr")
     
     # test that CheckAttributes successfully handles NA-containing vertex weights
@@ -60,21 +60,21 @@ test_CheckAttributes <- function() {
     values[1] <- "1"
     g <- set.edge.attribute(g, name="edge.attr", value=values)
     suppressWarnings(suppressMessages(g <- SANTA:::CheckAttributes(g, vertex.attr="vertex.attr", edge.attr="edge.attr")))
-    checkEquals(is.numeric(get.edge.attribute(g, name="edge.attr")[1]), T)
+    checkEquals(is.numeric(get.edge.attribute(g, name="edge.attr")[1]), TRUE)
     g <- remove.edge.attribute(g, "edge.attr")
     
     # test that CheckAttributes produces an error if it is unable to convert non-numeric edge weights
     values <- runif(ecount(g))
     values[1] <- "a"
     g <- set.edge.attribute(g, name="edge.attr", value=values)
-    suppressWarnings(checkException(res <- SANTA:::CheckAttributes(g, vertex.attr="vertex.attr", edge.attr="edge.attr"), silent=T))
+    suppressWarnings(checkException(res <- SANTA:::CheckAttributes(g, vertex.attr="vertex.attr", edge.attr="edge.attr"), silent=TRUE))
     g <- remove.edge.attribute(g, "edge.attr")
     
     # test that CheckAttributes produces an error if not all edge distances are greater or equal to 0
     values <- runif(ecount(g))
     values[1] <- -1
     g <- set.edge.attribute(g, name="edge.attr", value=values)
-    suppressWarnings(checkException(res <- SANTA:::CheckAttributes(g, vertex.attr="vertex.attr", edge.attr="edge.attr"), silent=T))
+    suppressWarnings(checkException(res <- SANTA:::CheckAttributes(g, vertex.attr="vertex.attr", edge.attr="edge.attr"), silent=TRUE))
     g <- remove.edge.attribute(g, "edge.attr")
     
     # test that CheckAttributes ensures all edge.attributes range between 0 and 1 (min != 0 but max == 1)

@@ -10,16 +10,16 @@ GraphDiffusion <- function(
     # the named numeric distance matrix is returned
     # any edge attribute specified should be the weight of the edge (higher weights -> more significant) not the distance
     
-    if (class(v) != "igraph.vs") v <- AsiGraph(v, g) # if v is not an igraph-class object, convert
+    if (!is(v, "igraph.vs")) v <- AsiGraph(v, g) # if v is not an igraph-class object, convert
     if (vcount(g) == 1) return(matrix(0, 1, 1, dimnames=list(v$name, V(g)$name))) # if only a single vertex is contained within the graph, return a single cell matrix
     
     # obtain the sparse unamed adjacency matrix
-    adj <- get.adjacency(g, attr=edge.attr.weight, names=F, sparse=T, type="both")
+    adj <- get.adjacency(g, attr=edge.attr.weight, names=FALSE, sparse=TRUE, type="both")
     
     # compute the distance matrix for each of the connected clusters of vertices
     D <- array(Inf, dim=rep(vcount(g), 2))
     c <- clusters(g) 
-    for (i in 1:c$no) {
+    for (i in seq_len(c$no)) {
         indices <- which(c$membership == i)
         D[indices, indices] <- Diffusionfct(adj[indices, indices], beta, correct.neg)
     }
@@ -46,7 +46,7 @@ Diffusionfct <- function(
     
     # compute the diffusion kernal
     H <- adj - Diagonal(x=apply(adj, 1, sum))
-    x <- eigen(H, symmetric=T)
+    x <- eigen(H, symmetric=TRUE)
     K  <- x$vectors %*% diag(exp(beta * x$values)) %*% t(x$vectors)
     Dsub <- outer(diag(K), diag(K), "+") - 2*K
     

@@ -9,7 +9,7 @@ Compute the strength of clustering of high-weight vertices (hits) on a network u
 \usage{
 Knet(g, nperm=100, dist.method=c("shortest.paths", "diffusion", "mfpt"),
 vertex.attr="pheno", edge.attr=NULL, correct.factor=1, nsteps=1000, 
-prob=c(0, 0.05, 0.5, 0.95, 1), parallel=NULL, B=NULL, verbose=TRUE)
+prob=c(0, 0.05, 0.5, 0.95, 1), B=NULL, verbose=TRUE)
 }
 \arguments{
   \item{g}{
@@ -36,9 +36,6 @@ Integer value, the number of bins into which vertex pairs are placed.
   \item{prob}{
 Numeric vector, the quantiles to be calculated for the \code{Knet} permutations.
 }
-  \item{parallel}{  
-Numeric value or \code{NULL}. If parallel computing is available, this value denotes the number of cores that the computation will be split over. 
-}
   \item{B}{
 Symmetrical numeric matrix. A precomputed distance bin matrix for \code{g} output by the \code{BinGraph} function. If \code{NULL}, then B is computed within the \code{Knet} function. 
 }
@@ -56,8 +53,6 @@ The SANTA method applies Ripley's K-function, a well-established approach to spa
 where \eqn{p_i} is the weight of vertex \eqn{i}, \eqn{\bar{p}} is the mean vertex weight across all vertices, and \eqn{I(dg[i,j]<=s)} is an identity function, equaling 1 if vertex \eqn{i} and vertex \eqn{j} are within distance \eqn{s} and \eqn{0} otherwise. 
 
 In order to derive a p-value and quantify the significance of the observed distribution of weights, the observed Knet-curve is compared to Knet-curves obtained using the same network but randomly permuted vertex weights. Vertices with missing weights (\code{NA}) are not included within these permutations. The area under the Knet-curve (AUK) is calculated for the observed network and each of the permuted networks and a z-score used to produce a p-value. This p-value indicates the probability an observed AUK at least this high is seen given the null hypothesis that the vertex weights are randomly distributed.
-
-If parallel computing is possible, \code{parallel} can be used to split permutations over multiple cores. The \code{snow} package is used to manage the parallel computing. If \code{parallel=NULL} or parallel computing is not possible, then only one core is used. If a positive integer is input and parallel computing is possible, then the permutations are split over up to this many cores.
 
 Vertex weights should be greater or equal that zero or equal to NA if the weight is missing.
 }
@@ -88,12 +83,12 @@ g.clustered <- barabasi.game(50, directed=FALSE)
 g.clustered <- SpreadHits(g.clustered, h=10, lambda=10)
 res.clustered <- Knet(g.clustered, nperm=100, vertex.attr="hits")
 res.clustered$pval
-plot(res.clustered)
+plot.Knet(res.clustered)
 
 # apply Knet to a network without hit clustering
 g.unclustered <- barabasi.game(50, directed=FALSE)
 g.unclustered <- SpreadHits(g.unclustered, h=10, lambda=0)
 res.unclustered <- Knet(g.unclustered, nperm=100, vertex.attr="hits")
 res.unclustered$pval
-plot(res.unclustered)
+plot.Knet(res.unclustered)
 }

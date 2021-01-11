@@ -7,10 +7,10 @@ BinGraph <- function(
     # split a distance matrix into bins
     
     # setup
-    if (verbose) message("computing graph distance bins... ", appendLF=F)
+    if (verbose) message("computing graph distance bins... ", appendLF=FALSE)
     if (!isSymmetric(D)) stop("D is not symmetric")
     if (nsteps < 2) stop("nsteps is < 2")
-    Dv <- D[lower.tri(D, diag=T)] # using only the lower triangle speeds computation
+    Dv <- D[lower.tri(D, diag=TRUE)] # using only the lower triangle speeds computation
     
     if (length(unique(Dv)) <= nsteps) {
         # if there are fewer than nsteps + 1 unique D values, use each unique value as a break
@@ -41,7 +41,7 @@ BinGraph <- function(
     
     # use the breaks to create binned distance matrix
     breaks[length(breaks)] <- Inf
-    B <- array(as.numeric(cut(D, breaks=breaks, include.lowest=T, right=T)), dim=dim(D))
+    B <- array(as.numeric(cut(D, breaks=breaks, include.lowest=TRUE, right=TRUE)), dim=dim(D))
     
     # format B
     B <- apply(B, 2, as.integer)

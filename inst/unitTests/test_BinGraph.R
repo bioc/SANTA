@@ -69,13 +69,13 @@ test_BinGraph <- function() {
     # 12)
     D <- matrix(1, 4,4)
     diag(D) <- 0
-    checkException(BinGraph(D, 1), silent=T)
+    checkException(BinGraph(D, 1), silent=TRUE)
     
     # 13)
     D <- matrix(1, 4,4)
     D[1,2] <- 2
     diag(D) <- 0
-    checkException(BinGraph(D, 1), silent=T)
+    checkException(BinGraph(D, 1), silent=TRUE)
     
     # 14) 
     nsteps <- 5

@@ -25,6 +25,9 @@ If the high-weight vertices are clustered, then the observed Knet curve and AUK 
 
 The first plot displays the the observed curve in red and the quantiles of the permuted curves in yellow. The quantile boundaries are displayed as grey lines. These boundaries are specified in the Knet function. The second plot displays the observed AUK as a red line and the distribution of permuted AUKs in grey. 
 }
+\value{
+Plots described in details section.
+}
 \references{
 Cornish, A.J. and Markowetz, F. (2014) \emph{SANTA: Quantifying the Functional Content of Molecular Networks.}. PLOS Computational Biology. 10:9, e1003808.
 }
@@ -40,12 +43,12 @@ g.clustered <- barabasi.game(100, directed=FALSE)
 g.clustered <- SpreadHits(g.clustered, h=10, lambda=10)    
 res.clustered <- Knet(g.clustered, nperm=10, vertex.attr="hits")
 res.clustered$pval
-plot(res.clustered)
+plot.Knet(res.clustered)
 
 # plot results without hit clustering
 g.unclustered <- barabasi.game(100, directed=FALSE)
 g.unclustered <- SpreadHits(g.unclustered, h=10, lambda=0)
 res.unclustered <- Knet(g.unclustered, nperm=10, vertex.attr="hits")
 res.unclustered$pval
-plot(res.unclustered)
+plot.Knet(res.unclustered)
 }

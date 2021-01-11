@@ -1,4 +1,7 @@
-import(igraph, Matrix, snow)
+import(igraph, Matrix)
+importFrom("graphics", "abline", "hist", "lines", "par", "polygon")
+importFrom("methods", "is")
+importFrom("stats", "pnorm", "quantile", "runif", "sd")
 
 export(
 	BinGraph,
@@ -12,5 +15,7 @@ export(
 	plot.Knet, 
 	SpreadHits
 )
+
+S3method(plot, Knet)
 
 useDynLib(SANTA)

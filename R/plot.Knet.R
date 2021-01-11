@@ -30,7 +30,7 @@ plot.Knet <- function(
     }
     plot(NA, ylim=range(K.obs, K.quan), xlim=c(0, g.max), xlab="Distance in graph", ylab="Knet", main="Knet-function", ...)
     polygon(x=c(0:g.max, g.max:0), y=c(K.quan["0%",], rev(K.quan["100%",])), col="lightyellow", border=NA)
-    for (i in 1:nrow(K.quan)) lines(0:(ncol(K.quan)-1), K.quan[i,], col="grey", lty=lty[i], lwd=lwd[i])
+    for (i in seq_len(nrow(K.quan))) lines(0:(ncol(K.quan)-1), K.quan[i,], col="grey", lty=lty[i], lwd=lwd[i])
     lines(x=0:g.max, y=K.obs, col="red", lwd="3")
 	
     # plot 2

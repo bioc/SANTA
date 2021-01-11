@@ -9,7 +9,7 @@ The compactness score of set of hits on a network is the mean distance between e
 \usage{
 Compactness(g, nperm=100, dist.method=c("shortest.paths", "diffusion", "mfpt"), 
 vertex.attr="pheno", edge.attr="distance", correct.factor=1, D=NULL, 
-verbose=T)
+verbose=TRUE)
 }
 \arguments{
   \item{g}{

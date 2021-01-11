@@ -2,7 +2,7 @@ CheckAttributes <- function(
     g, 
     vertex.attr="pheno", 
     edge.attr=NULL,
-    verbose=T
+    verbose=TRUE
 ) {
     # check that vertex and edge weights are present in a graph and convert them if neccessary
     
@@ -23,7 +23,7 @@ CheckAttributes <- function(
         if (!is.numeric(vertex.weights)) {
             if (is.logical(vertex.weights)) {
                 missing.char <- is.na(vertex.weights)
-                vertex.weights[missing.char] <- F
+                vertex.weights[missing.char] <- FALSE
             } else {
                 warning("non-numeric/non-logical vertex weights found and converted to numerals")
                 missing.char <- vertex.weights == "NA"

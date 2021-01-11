@@ -5,7 +5,7 @@ test_Compactness <- function() {
     #     | 
     #     3
     
-    g <- graph.empty(5, directed=F)
+    g <- graph.empty(5, directed=FALSE)
     g <- add.edges(g, c(1,2,1,3,1,4,4,5))
     g <- set.vertex.attribute(g, "vw1", value=c(1, 0, 0, 1, 0))
     g <- set.vertex.attribute(g, "vw2", value=c(0, 1, 0, 0, 1))

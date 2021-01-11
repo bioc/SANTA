@@ -1,7 +1,12 @@
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Introduction to SANTA}
--->
+---
+title: "Introduction to SANTA"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to SANTA}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
 ````{r setup, echo=FALSE}
 options(width = 75)
 options(useFancyQuotes=FALSE)
@@ -107,7 +112,7 @@ We will use the Barabasi-Albert model of preferential attachment to simulate the
 require(SANTA)
 require(igraph)
 set.seed(1) # for reproducibility
-g <- barabasi.game(n=500, power=1, m=1, directed=F) 
+g <- barabasi.game(n=500, power=1, m=1, directed=FALSE) 
 ```
 
 A cluster of hits is simulated by first randomly choosing a seed vertex. All other vertices within the network are then ranked according to their distance to the from the seed vertex. The distance can be measured using any of the previously described distance metrics (shortest paths, diffusion kernel and MFPT). In this example, we will use the shortest paths metric, as it is the quickest to run. However, running the analysis with the other methods will produce the same results. 
@@ -115,14 +120,14 @@ A cluster of hits is simulated by first randomly choosing a seed vertex. All oth
 ```{r case_i_compute_d}
 # measure the distance between pairs of vertices in g
 dist.method <- "shortest.paths"
-D <- DistGraph(g, dist.method=dist.method, verbose=F) 
+D <- DistGraph(g, dist.method=dist.method, verbose=FALSE) 
 ```
 
 The `Knet` function computes the distances between each pair of vertices in $g$. However, to reduce the time required to run the function, these distances can be computed outside the function. The `Knet` function cannot be run on the raw continuous distances. Therefore, it is necessary to place the pairs of vertices into discreet bins. This is done using the `BinGraph} function.  
 
 ```{r case_i_compute_b}
 # place the distances into discreet bins
-B <- BinGraph(D, verbose=F)
+B <- BinGraph(D, verbose=FALSE)
 ```
 
 Next, we will generate clusters of hits and measure the clustering strength using the `Knet` function. The $s$ vertices positioned closest to the seed vertex form the sample set. From this set, 5 vertices are randomly selected to form the hit set. The size of the hit set needs to be small compared to the number of vertices in the network. Increasing the value of $s$ decreases the strength of the clustering. We will test 5 different values of $s$ in order to simulate different clustering strengths. A value of $s$ equal to the total number of vertices in the network produces a hit set containing vertices randomly selected from the entire network. For each value of $s$, we will conduct 10 trials. In the associated paper, 1000 trials were run. Here we will also use 100 permutations, rather than 1000, in order to reduce the time required.
@@ -147,7 +152,7 @@ for (s in s.to.use) {
             value=as.numeric(1:vcount(g) %in% hit.set))
         pvalues[i, as.character(s)] <- Knet(g, nperm=100, 
             dist.method=dist.method, vertex.attr="hits", 
-            B=B, verbose=F)$pval
+            B=B, verbose=FALSE)$pval
     }
 }
 ```
@@ -183,7 +188,7 @@ weights1 <- weights2 <- rep(0, n.nodes)
 weights1[c(1,2)] <- 1
 weights2[c(5,6)] <- 1 
 
-g <- graph.empty(n.nodes, directed=F)
+g <- graph.empty(n.nodes, directed=FALSE)
 g <- add.edges(g, edges)
 g <- set.vertex.attribute(g, "weights1", value=weights1)
 g <- set.vertex.attribute(g, "weights2", value=weights2)
@@ -212,12 +217,12 @@ We will now apply `Knet` and `Compactness` to each set of hits in order to measu
 
 ```{r case_ii_pvalues}
 # set 1
-Knet(g, nperm=100, vertex.attr="weights1", verbose=F)$pval
-Compactness(g, nperm=100, vertex.attr="weights1", verbose=F)$pval
+Knet(g, nperm=100, vertex.attr="weights1", verbose=FALSE)$pval
+Compactness(g, nperm=100, vertex.attr="weights1", verbose=FALSE)$pval
 
 # set 2
-Knet(g, nperm=100, vertex.attr="weights2", verbose=F)$pval
-Compactness(g, nperm=100, vertex.attr="weights2", verbose=F)$pval
+Knet(g, nperm=100, vertex.attr="weights2", verbose=FALSE)$pval
+Compactness(g, nperm=100, vertex.attr="weights2", verbose=FALSE)$pval
 ```
 
 The `Compactness` function does not incorporate vertex degree when measuring the significance of hit clustering. For this reason, it outputs a similar p-value for each hit set. `Knet` incorporates the global distribution of vertices and therefore identifies set 2 as clustering more significantly than set 1. It is therefore preferable to use `Knet` instead of `Compactness` when the degree of vertices varies across a network.
@@ -270,7 +275,7 @@ We will now apply the `Knet` function to each GO terms on each network in order 
 # results <- list()
 # for (name in network.names) {
 #     results[[name]] <- Knet(networks[[name]], nperm=1000, 
-#         vertex.attr=go.terms, edge.attr="distance", verbose=F)
+#         vertex.attr=go.terms, edge.attr="distance", verbose=FALSE)
 #     results[[name]] <- sapply(results[[name]], 
 #         function(res) res$pval)
 # }
@@ -334,10 +339,10 @@ xx <- as.list(org.Sc.sgdGO2ALLORFS)
 associated.genes <- xx[["GO:0006974"]] 
 associations <- sapply(networks, function(g) 
     as.numeric(V(g)$name %in% associated.genes), 
-    simplify=F)
+    simplify=FALSE)
 networks <- sapply(network.names, function(name) 
     set.vertex.attribute(networks[[name]], "rdds", 
-    value=associations[[name]]), simplify=F)
+    value=associations[[name]]), simplify=FALSE)
 ```
 
 We will now apply the `Knet` function to the GO term on each network in order to measure the strength of association. The greater the number of permutations run, the greater the accuracy of the p-value.
@@ -347,7 +352,7 @@ We will also run `Knet` using the shortest paths method to compute the distance 
 ```{r case_iv_association}
 # results <- sapply(networks, function(g) Knet(g, nperm=1000, 
 #     dist.method="shortest.paths", vertex.attr="rdds", 
-#     edge.attr="distance"), simplify=F)
+#     edge.attr="distance"), simplify=FALSE)
 # p.values <- sapply(results, function(res) res$pval)
 # p.values
 ```
@@ -398,10 +403,10 @@ xx <- as.list(org.Sc.sgdGO2ALLORFS)
 associated.genes <- xx[["GO:0000725"]] 
 associations <- sapply(networks, function(g) 
     as.numeric(V(g)$name %in% associated.genes), 
-    simplify=F)
+    simplify=FALSE)
 networks <- sapply(network.names, function(name)
     set.vertex.attribute(networks[[name]], "dsbr", 
-    value=associations[[name]]), simplify=F)
+    value=associations[[name]]), simplify=FALSE)
 ```
 
 The `Knet` function will again be used to compare the strength of association of the GO term with the 2 networks. This code is commented to reduce the time required to run the vignette. 
@@ -461,7 +466,7 @@ Next, we will apply the vertex weights to the networks. Not all networks genes h
 ```{r case_vi_weights}
 network.names <- names(networks)
 network.genes <- sapply(networks, get.vertex.attribute, 
-    name="name", simplify=F)
+    name="name", simplify=FALSE)
 rnai.cheung.genes <- rownames(rnai.cheung)
 cancers <- colnames(rnai.cheung)
 
@@ -483,7 +488,7 @@ We will now apply the `Knet`-function to these scores. Due to the time required 
 ```{r case_vi_association}
 #knet.res <- sapply(networks, Knet, nperm=100, 
 #   dist.method="shortest.paths", vertex.attr=cancers, 
-#   edge.attr="distance", simplify=F)
+#   edge.attr="distance", simplify=FALSE)
 #p.values <- sapply(knet.res, function(i) sapply(i, 
 #   function(j) j$pval))
 ```
@@ -540,7 +545,7 @@ We will now apply BioNet to the network and the simulated p-values, in order to 
 
 ```{r case_vii_apply_bionet}
 # # apply BioNet to the network and p-values
-# bum <- fitBumModel(p.values, plot=F)
+# bum <- fitBumModel(p.values, plot=FALSE)
 # scores <- scoreNodes(network=g, fb=bum, fdr=0.1)
 # module <- runFastHeinz(g, scores)
 ```
@@ -615,7 +620,7 @@ In order to use both the expression and survival data, it is necessary to combin
 # 
 # # aggregate p-values
 # pvals <- cbind(dataLym$t.pval, dataLym$s.pval)
-# pval <- aggrPvals(pvals, order=2, plot=F)
+# pval <- aggrPvals(pvals, order=2, plot=FALSE)
 # names(pval) <- dataLym$label
 ```
 
@@ -627,7 +632,7 @@ The `SANTA` package requires networks to be `igraph` objects. Therefore, we will
 # # derive Lymphochip-specific network
 # network <- subNetwork(featureNames(exprLym), interactome)
 # network <- largestComp(network) # use only the largest component
-# network <- igraph.from.graphNEL(network, name=T, weight=T) 
+# network <- igraph.from.graphNEL(network, name=TRUE, weight=TRUE) 
 # network <- simplify(network)
 ```
 
@@ -635,7 +640,7 @@ We will now use BioNet to identify an enriched subnetwork within the network.
 
 ```{r case_viii_run_bionet}
 # # run BioNet on the Lymphochip-specific network and aggregate p-values
-# fb <- fitBumModel(pval, plot=F)
+# fb <- fitBumModel(pval, plot=FALSE)
 # scores <- scoreNodes(network, fb, fdr=0.001)
 # module <- runFastHeinz(network, scores)
 # extract.entrez <- function(x) str_extract(str_extract(x, 
@@ -655,7 +660,7 @@ As previously discussed, the `Knode` function requires p-values to be converted 
 # # run Knode on the Lymphochip-specific network and 
 # # converted aggregate p-values
 # knode.results <- Knode(network, dist.method="diffusion", 
-#     vertex.attr="pheno", verbose=F)
+#     vertex.attr="pheno", verbose=FALSE)
 # knode.genes <- extract.entrez(names(knode.results)[1:vcount(module)])
 ```
 
@@ -681,20 +686,4 @@ This document was produced using:
 
 ```{r session_info}
 sessionInfo()
-```
-
-
-
-### References
-
-```{r setup_references, echo=FALSE, results="hide"}
-suppressMessages(library("knitcitations"))
-cleanbib()
-suppressMessages(bib <- read.bibtex("refs.bib"))
-citations <- c("White2003", "Costanzo2010", "Gaetan2010", "GeneOntology2000", "Beisser2010", "Bandyopadhyay2010", "Peri2003", "Cheung2011", "Orchard2014", "Lee2011", "Srivas2013a")
-suppressWarnings(suppressMessages(citep(bib[citations])))
-```
-
-```{r print_references, results='asis', echo=FALSE}
-bibliography()
 ```
