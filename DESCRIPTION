@@ -1,12 +1,12 @@
 Package: SANTA
 Type: Package
 Title: Spatial Analysis of Network Associations
-Version: 2.27.1
+Version: 2.27.2
 Authors@R: person("Alex", "Cornish", role = c("cre","aut"),
              email = "alex.cornish@icr.ac.uk")
 Date: 11 January 2021
 Imports: graphics, Matrix, methods, stats
-Depends: R (>= 4.0.0), igraph
+Depends: R (>= 4.1), igraph
 Suggests: RUnit, BiocGenerics, knitr, formatR,
         org.Sc.sgd.db, BioNet, DLBCL, msm
 Description: This package provides methods for measuring the strength of association between a network and a phenotype. It does this by measuring clustering of the phenotype across the network (Knet). Vertices can also be individually ranked by their strength of association with high-weight vertices (Knode).
