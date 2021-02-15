@@ -30,13 +30,12 @@ CheckAttributes <- function(
                 vertex.weights[missing.char] <- "0"     	
             }
             
-            suppressWarnings(vertex.weights <- as.numeric(vertex.weights))
+            vertex.weights <- as.numeric(vertex.weights)
             if (sum(is.na(vertex.weights)) > 0) stop("unable to convert non-numeric vertex weights to numerals")
             
             vertex.weights[missing.char] <- NA
             g <- remove.vertex.attribute(g, attr)
             g <- set.vertex.attribute(g, attr, value=vertex.weights)
-            
         }
         
         # check that all vertex weights are greater or equal to 0. If not, return error

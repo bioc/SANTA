@@ -17,12 +17,12 @@ Knet <- function(
     g <- CheckAttributes(g, vertex.attr, edge.attr, verbose)
     
     # the results are saved in a list with an entry for each vertex.attr. Done even if only 1 vertex.attr supplied
-    tmp        <- vector("list", 6)
+    tmp <- vector("list", 6)
     names(tmp) <- c("K.obs", "AUK.obs", "K.perm", "AUK.perm", "K.quan", "pval")
     class(tmp) <- "Knet"
-    res        <- rep(list(tmp), length(vertex.attr)) 
+    res <- rep(list(tmp), length(vertex.attr)) 
     names(res) <- vertex.attr
-    nvertices  <- as.integer(vcount(g))
+    nvertices <- as.integer(vcount(g))
     
     if (is.null(B)) {
         # compute B and D
@@ -56,10 +56,13 @@ Knet <- function(
        
         # if specified, run the Knet function on permutations of the graph
         if (!is.null(nperm) & nperm > 0) {
- 	    # run permutations
+ 	        # run permutations
             res[[attr]]$K.perm <- list()
-	    for (i in seq_len(nperm)) res[[attr]]$K.perm[[i]] <- .Call("computenetK_fewzeros", Bv, Shuffle(vertex.weights, ignore=vertex.weights.is.na), nvertices, maxB)
-	    res[[attr]]$K.perm <- do.call("cbind", res[[attr]]$K.perm)
+            for (i in seq_len(nperm)) {
+                vertex.weights.shuffled <- Shuffle(vertex.weights, ignore=vertex.weights.is.na)
+                res[[attr]]$K.perm[[i]] <- .Call("computenetK_fewzeros", Bv, vertex.weights.shuffled, nvertices, maxB)
+            }
+            res[[attr]]$K.perm <- do.call("cbind", res[[attr]]$K.perm)
             
             # calculate the quantiles, AUK and p-values (through the z-score) for the permutations
             res[[attr]]$K.quan <- apply(res[[attr]]$K.perm, 1, function(x) quantile(x, prob=prob))

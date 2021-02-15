@@ -13,8 +13,8 @@ options(useFancyQuotes=FALSE)
 
 ```
 ```{r hook-printfun, echo=FALSE}
-library(knitr)
-library(formatR)
+library(knitr, quietly=TRUE)
+library(formatR, quietly=TRUE)
 knit_hooks$set(printfun = function(before, options, envir) {
     if (before) return()
     txt = capture.output(dump(options$printfun, '', envir = envir))
@@ -109,8 +109,8 @@ We will use the Barabasi-Albert model of preferential attachment to simulate the
 
 ```{r case_i_graph_create}
 # generate the simulated network
-require(SANTA)
-require(igraph)
+require(SANTA, quietly=TRUE)
+require(igraph, quietly=TRUE)
 set.seed(1) # for reproducibility
 g <- barabasi.game(n=500, power=1, m=1, directed=FALSE) 
 ```
@@ -255,7 +255,7 @@ Associations between genes and GO terms will be obtained from the Gene Ontology 
 
 ```{r case_iii_go}
 # obtain the GO term associations from org.Sc.sgd.db package
-library(org.Sc.sgd.db)
+library(org.Sc.sgd.db, quietly=TRUE)
 xx <- as.list(org.Sc.sgdGO2ALLORFS)
 go.terms <- c("GO:0000082", "GO:0003682", "GO:0007265", 
               "GO:0040008", "GO:0090329")
@@ -269,37 +269,17 @@ for (name in network.names) {
 } 
 ```
 
-We will now apply the `Knet` function to each GO terms on each network in order to quantify the strength of association. If a gene is associated with the GO term it will given a weight of 1. If it is not associated, it will be given a weight of 0. We will now store these scores in the 2 graphs under a vertex attribute called `rdds`. Due the time required, the result of this code is commented. 
+We will now apply the `Knet` function to each GO terms on each network in order to quantify the strength of association. If a gene is associated with the GO term it will given a weight of 1. If it is not associated, it will be given a weight of 0. We will now store these scores in the 2 graphs under a vertex attribute called `rdds`. Due to the time required to compute the distance matrices, the number of permutations has been reduced to 10. Running at least 1000 permutations is recommended.
 
 ```{r case_iii_association}
-# results <- list()
-# for (name in network.names) {
-#     results[[name]] <- Knet(networks[[name]], nperm=1000, 
-#         vertex.attr=go.terms, edge.attr="distance", verbose=FALSE)
-#     results[[name]] <- sapply(results[[name]], 
-#         function(res) res$pval)
-# }
+results <- list()
+for (name in network.names) {
+    results[[name]] <- Knet(networks[[name]], nperm=10, 
+        vertex.attr=go.terms, edge.attr="distance", verbose=FALSE)
+    results[[name]] <- sapply(results[[name]], 
+        function(res) res$pval)
+}
 ```
-
-This code can be used to plot the results. Each point represents a single GO term. The $-log_{10}$ of the p-values has been plotted.
-
-```{r case_iii_plot}
-# p.values <- array(unlist(results), dim=c(length(go.terms), 
-#       length(network.names)), dimnames=list(go.terms, 
-#       network.names))
-# p.values.ml10 <- -log10(p.values)
-# axis.range <- c(0, max(p.values.ml10)) 
-# plot(p.values.ml10[, "raw"], p.values.ml10[, "cor"], asp=1, 
-#       xlim=axis.range, ylim=axis.range, bty="l", 
-#       xlab="-log10 of the p-value in the raw GI network", 
-#       ylab="-log10 of the p-value in the correlation network", 
-#       main="")
-# abline(0, 1, col="red")
-```
-
-![raw_vs_correlation](fig_case_3_association.jpg)
-
-Figure 3 compares the strength of association of each GO term with each network. By increasing the number of GO terms tested, it is possible to demonstrate that using correlation in GI profile rather than raw interaction produces a functionally more informative network.
 
 ```{r case_iii_cleanup, echo=FALSE}
 # cleanup
@@ -333,7 +313,7 @@ We will the Gene Ontology (GO) project to identify those genes involved in respo
 
 ```{r case_iv_go}
 # obtain GO term associations
-library(org.Sc.sgd.db)
+library(org.Sc.sgd.db, quietly=TRUE)
 xx <- as.list(org.Sc.sgdGO2ALLORFS)
 # change to use alternative GO terms
 associated.genes <- xx[["GO:0006974"]] 
@@ -347,29 +327,17 @@ networks <- sapply(network.names, function(name)
 
 We will now apply the `Knet` function to the GO term on each network in order to measure the strength of association. The greater the number of permutations run, the greater the accuracy of the p-value.
 
-We will also run `Knet` using the shortest paths method to compute the distance between vertex pairs. However, as shown in the associated paper, the `diffusion` and `mfpt` distance measures produce the same results. This can be demonstrated by replacing the `dist.method` argument below with one of the alternative distance measures. By running this analysis with additional GO terms, the robustness of the `Knet` across different distance measures can be seen.
+We will also run `Knet` using the shortest paths method to compute the distance between vertex pairs. However, as shown in the associated paper, the `diffusion` and `mfpt` distance measures produce the same results. This can be demonstrated by replacing the `dist.method` argument below with one of the alternative distance measures. By running this analysis with additional GO terms, the robustness of the `Knet` across different distance measures can be seen. Due to the time required to compute the distance matrices, the number of permutations has been reduced to 10. Running with least 1000 permutations is recommended.
 
 ```{r case_iv_association}
-# results <- sapply(networks, function(g) Knet(g, nperm=1000, 
-#     dist.method="shortest.paths", vertex.attr="rdds", 
-#     edge.attr="distance"), simplify=FALSE)
-# p.values <- sapply(results, function(res) res$pval)
-# p.values
+results <- sapply(networks, function(g) Knet(g, nperm=10, 
+    dist.method="shortest.paths", vertex.attr="rdds", 
+    edge.attr="distance"), simplify=FALSE)
+p.values <- sapply(results, function(res) res$pval)
+p.values
 ```
 
 Since the GO term tested was `response to DNA damage stimulus`, it is not surprising that the gene set associated more significantly with the treated network (as shown by the lower p-value). The yeast exposed to the DNA-damaging agent have activated or upregulated pathways involved in responding to the agent, thereby increasing the strength of the genetic interaction between DNA-damage response-related genes.
-
-We will now visualise the observed and permuted `Knet` curves and AUKs for the GO term on the DNA-damaged and undamaged networks. 
-
-```{r case_iv_plot}
-# plot(results$treated)
-# plot(results$untreated)
-```
-
-![dna_1](fig_dna_1.jpg)
-![dna_2](fig_dna_2.jpg)
-
-The observed `Knet`-function curve (red line) and the permuted `Knet`-function curve quantiles (yellow area) for the `response to DNA Damage Stimulus` gene set on the DNA-damaged (Top Left) and undamaged (Bottom Left) GI networks. The position of the observe curves relative to the permuted quantiles indicates that the gene set associates strongly with both networks. (Right) The observed `Knet`-function AUK (red line) and the permuted `Knet`-function AUKs (grey histogram) on the DNA-damaged (Top Right) and undamaged (Bottom Right) GI networks. The differences between the observed and permuted AUKs indicates that the genes set associates strongly with both networks, but most strongly with the DNA-damaged network.
 
 ```{r case_iv_cleanup, echo=FALSE}
 # cleanup
@@ -398,7 +366,7 @@ We will again test only a single GO term (GO:0000725, recombinational repair). I
 
 ```{r case_v_go}
 # obtain GO term associations
-library(org.Sc.sgd.db)
+library(org.Sc.sgd.db, quietly=TRUE)
 xx <- as.list(org.Sc.sgdGO2ALLORFS)
 associated.genes <- xx[["GO:0000725"]] 
 associations <- sapply(networks, function(g) 
@@ -409,13 +377,13 @@ networks <- sapply(network.names, function(name)
     value=associations[[name]]), simplify=FALSE)
 ```
 
-The `Knet` function will again be used to compare the strength of association of the GO term with the 2 networks. This code is commented to reduce the time required to run the vignette. 
+The `Knet` function will again be used to compare the strength of association of the GO term with the 2 networks. Due to the time required to compute the distance matrices, the number of permutations has been reduced to 10. Running with least 1000 permutations is recommended.
 
 ```{r case_v_association}
-# p.values <- sapply(networks, function(g) 
-#       Knet(g, nperm=1000, dist.method="shortest.paths", 
-#       vertex.attr="dsbr", edge.attr="distance")$pval)
-# p.values
+p.values <- sapply(networks, function(g) 
+       Knet(g, nperm=10, dist.method="shortest.paths", 
+       vertex.attr="dsbr", edge.attr="distance")$pval)
+p.values
 ```
 
 As expected, the GO term associates more strongly with the UV treated network. This is likely due to the functional rewiring that occurs within the yeast when exposed to DNA-damaging UV radiation.
@@ -483,14 +451,15 @@ for (cancer in cancers) {
 }
 ```
 
-We will now apply the `Knet`-function to these scores. Due to the time required to compute the distance matrices, this code has been commented out. However, it can be easily run if wished. 
+We will now apply the `Knet`-function to these scores. Due to the time required to compute the distance matrices, the number of permutations has been reduced to 10. Running with least 1000 permutations is recommended.
 
 ```{r case_vi_association}
-#knet.res <- sapply(networks, Knet, nperm=100, 
-#   dist.method="shortest.paths", vertex.attr=cancers, 
-#   edge.attr="distance", simplify=FALSE)
-#p.values <- sapply(knet.res, function(i) sapply(i, 
-#   function(j) j$pval))
+knet.res <- sapply(networks, Knet, nperm=10, 
+   dist.method="shortest.paths", vertex.attr=cancers, 
+   edge.attr="distance", simplify=FALSE)
+p.values <- sapply(knet.res, function(i) sapply(i, 
+   function(j) j$pval))
+p.values
 ```
 
 The RNAi data from the colon and ovarian cancer cell lines associate strongly with both networks. However, they associate associate more strongly with the HumanNet network, indicating that the HumanNet network better explains the cellular mechanisms involved in maintaining these cell lines.
@@ -499,185 +468,6 @@ The RNAi data from the colon and ovarian cancer cell lines associate strongly wi
 # cleanup
 rm(rnai.cheung, rnai.cheung.genes, networks, network.genes, edgelist.humannet, edgelist.intact, common.genes, g.humannet, g.intact)
 ```
-
-
-
-
-##### vii) Comparison of `Knode` and BioNet using simulated data
-
-In the next section, we will compare the `Knode`-function to BioNet. BioNet overlays molecular networks with node information in identifies high-scoring subnetwork. The `Knode` function identifies nodes close to large numbers of high-scoring nodes and can therefore also be used to identify high-scoring subnetworks. However, as the `Knode`-function considers each node individually, it can be used to identify high-scoring nodes across multiple clusters.
-
-We will simulate a network containing multiple clusters of high-scoring nodes. We will then apply both the `Knode` function and BioNet in order to compare performance. In the associated paper, this analysis is repeated using 2, 3 and 4 clusters with 1000 trials. In the code below, only 1 trial is run by default. The code is commented due to the time required.
-
-The BioNet tool is available as an R-package. 
-
-```{r case_vii_bionet}
-#library(BioNet)
-```
-
-For previously explained reasons, we will use the Barabasi-Albert model of preferential attachment to create the network. We will use the `SpreadHits` function to apply 3 clusters of 10 hits to the network. In the associated paper, this analysis was also run with 2 and 4 clusters. The `SpreadHits` function first identifies a seed node for each cluster, located a minimum distance from each other. We will use a distance cutoff of 12, to ensure that each of the clusters of hits is located on a different part of the network. The `shortest.paths` method will be used to measure distances when spreading hits. However, the same results can be produced using the `diffusion` and `mfpt` distance measures. How strongly the hits cluster depend on the parameters `lambda`, which we will set to 10, to ensure that there is strong clustering of the hits.
-
-```{r case_vii_network}
-# # required parameters
-# n.nodes <- 1000
-# n.hits <- 10
-# clusters <- 3
-# 
-# # create network and spread hits across 3 clusters
-# g <- barabasi.game(n=n.nodes, power=1, m=1, directed=FALSE) 
-# g <- SpreadHits(g, h=n.hits, clusters=clusters, distance.cutoff=12, 
-#     lambda=10, dist.method="shortest.paths", verbose=FALSE)
-```
-
-We will now simulate a distribution of p-values and apply them to the network as a vertex attribute. The p-values of the non-hit vertices will be selected from a uniform distribution, as would be expected if there was no associated between these genes and the phenotype being studied. The p-values of the hits will be selected from a truncated normal distribution centred around 0.
-
-```{r case_vii_pvalues}
-# # simulate p-values
-# library(msm)
-# hits <- which(get.vertex.attribute(g, "hits") == 1)
-# p.values <- runif(vcount(g))
-# names(p.values) <- as.character(1:vcount(g))
-# p.values[as.character(hits)] <- rtnorm(n.hits * clusters, mean=0, 
-#     sd=10e-6, lower=0, upper=1)
-```
-
-We will now apply BioNet to the network and the simulated p-values, in order to try to identify the enriched subnetworks. A full explanation of the BioNet tool is given in the BioNet R-package vignette. `module` contains each of the vertices identified as being located within an enriched subnetwork. 
-
-```{r case_vii_apply_bionet}
-# # apply BioNet to the network and p-values
-# bum <- fitBumModel(p.values, plot=FALSE)
-# scores <- scoreNodes(network=g, fb=bum, fdr=0.1)
-# module <- runFastHeinz(g, scores)
-```
-
-We will now apply the `Knode` function to the network. First, we will transform the p-values to vertex weights. This will be done by taking the $-log_{10}$ of the p-values, in order to ensure that the vertices with the lowest p-values have the greatest scores. `Knode` returns a ranked list of scores for each of the vertices in the network. 
-
-```{r case_vii_apply_knode}
-# # apply Knode to the network
-# g <- set.vertex.attribute(g, name="pheno", value=-log10(p.values))  
-# knode.results <- Knode(g, dist.method="diffusion", 
-#     vertex.attr="pheno", verbose=FALSE)
-```
-
-In total, 30 hits were applied to the network. We will now compare what number of these 30 hits are contained within the enriched subnetwork identified by BioNet and within the top 30 vertices ranked by the `Knode`-function. 
-
-```{r case_vii_numbers}
-# # number of hits identified by BioNet 
-# sum(hits %in% as.numeric(V(module)$name))
-# 
-# # number of hits ranked within the top 30 by Knode
-# sum(hits %in% as.numeric(names(knode.results)[1:(n.hits * clusters)]))
-```
-
-As explained earlier, whilst BioNet tends to identify hits contained only within a single cluster, the fact that `Knode` considers each vertex individually allows it to identify hits contained within multiple clusters. Figure~\ref{fig:bionet_simulation} shows the subnetwork created from only the hits in the network. In the first and second subnetwork, the hits identified by BioNet and Knode are coloured. Vertices successfully identified by BioNet are coloured blue in the left network and those successfully identified by `Knode`~are coloured green on the right network.
-
-```{r case_vii_plot}
-# # create subnetworks
-# g.bionet <- g.knode <- induced.subgraph(g, hits)
-# color.bionet <- color.knode <- rep("grey", vcount(g.bionet))
-# color.bionet[hits %in% as.numeric(V(module)$name)] <- "blue"
-# color.knode[hits %in% as.numeric(names(knode.results)[1:(n.hits * clusters)])] <- "green"
-# g.bionet <- set.vertex.attribute(g.bionet, "color", value=color.bionet)
-# g.knode <- set.vertex.attribute(g.knode, "color", value=color.knode)
-# 
-# # plot subnetworks
-# par(mfrow=c(1,2))
-# plot(g.bionet)
-# plot(g.knode)
-```
-
-![bionet](fig_bionet_simulation.jpg)
-
-```{r case_vii_cleanup, echo=FALSE}
-# # cleanup
-# rm(vertex.weights, p.values, g)
-```
-
-
-
-
-##### viii) Comparison of `Knode` and BioNet using real data
-
-The previous section compared `Knode` and BioNet using simulated data; in this section we will make the comparison using real data. The analysis of this data was originally conducted in the BioNet R-package vignette and discussed in paper by Beisser et al. This makes the comparison of the two methods easier.  
-
-In this analysis, we will use expression data from two subtypes of diffuse large B-cell lymphomas (DLBCL, the ABC and GCB subtypes), p-values derived from survival analysis and a network derived from the HPRD database. We will use this data to identify interaction modules involved in DLBCL. This code is commented due to the time required.
-
-```{r case_viii_load}
-# # load required package
-# library(SANTA)
-# library(BioNet)
-# library(DLBCL)
-# data(exprLym) 
-# data(dataLym) 
-# data(interactome) 
-```
-
-In order to use both the expression and survival data, it is necessary to combine this into a single p-value. First, differential analysis is used to identify genes that are significantly differentially expression between the two tumour types (results contained within the DLBCL package). We will then use order statistics to combine the differential expression p-values with the survival p-values.
-
-```{r case_viii_pvalues}
-# # extract entrez IDs
-# library(stringr)
-# 
-# # aggregate p-values
-# pvals <- cbind(dataLym$t.pval, dataLym$s.pval)
-# pval <- aggrPvals(pvals, order=2, plot=FALSE)
-# names(pval) <- dataLym$label
-```
-
-There are a number of genes contained within the HPRD network for which we do not have expression or survival data. We will therefore remove these genes.
-
-The `SANTA` package requires networks to be `igraph` objects. Therefore, we will convert the network from a `graphNEL` object. 
-
-```{r case_viii_network}
-# # derive Lymphochip-specific network
-# network <- subNetwork(featureNames(exprLym), interactome)
-# network <- largestComp(network) # use only the largest component
-# network <- igraph.from.graphNEL(network, name=TRUE, weight=TRUE) 
-# network <- simplify(network)
-```
-
-We will now use BioNet to identify an enriched subnetwork within the network.
-
-```{r case_viii_run_bionet}
-# # run BioNet on the Lymphochip-specific network and aggregate p-values
-# fb <- fitBumModel(pval, plot=FALSE)
-# scores <- scoreNodes(network, fb, fdr=0.001)
-# module <- runFastHeinz(network, scores)
-# extract.entrez <- function(x) str_extract(str_extract(x, 
-#   "[(][0-9]+"), "[0-9]+")
-# bionet.genes <- extract.entrez(V(module)$name)
-```
-
-As previously discussed, the `Knode` function requires p-values to be converted into vertex weights. We will therefore take the $-log_{10}$ of the aggregated p-values and apply these to the network before running the `Knode` function.
-
-```{r case_viii_run_knode}
-# # convert p-values to vertex weights
-# vertex.weights <- -log10(pval)[get.vertex.attribute(network, 
-#   "name")]
-# network <- set.vertex.attribute(network, name="pheno", 
-#   value=vertex.weights)
-# 
-# # run Knode on the Lymphochip-specific network and 
-# # converted aggregate p-values
-# knode.results <- Knode(network, dist.method="diffusion", 
-#     vertex.attr="pheno", verbose=FALSE)
-# knode.genes <- extract.entrez(names(knode.results)[1:vcount(module)])
-```
-
-Due to the different methods employed by BioNet and `Knode`, different enriched subnetworks are identified. Beisser et al. note that when they apply BioNet to this data, they identify a significant enrichment within the module of genes involved in the regulation of apoptotic process (GO:0042981). Upon application of `Knode`, modules enriched in the regulation of apoptosis are identified ($p<1*10^{-7}$).
-
-```{r case_viii_compare}
-# data(go.entrez)
-# sum(go.entrez %in% bionet.genes)
-# sum(go.entrez %in% knode.genes)
-```
-
-```{r case_viii_cleanup, echo=FALSE}
-# # cleanup
-# rm(dataLym, exprLym, interactome, network, pval, pvals)
-```
-
-
 
 
 ### Session info

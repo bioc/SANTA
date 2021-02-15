@@ -17,11 +17,10 @@ Compactness <- function(
    
     # produce list to hold results
     element.names <- c("score.obs", "score.perm", "pval") 
-    res <- list()
-    for (attr in vertex.attr) {
-        res[[attr]] <- list()
-        for (element.name in element.names) res[[attr]][[element.name]] <- NA
-    }
+    res.attr <- rep(list(NA), length(element.names))
+    names(res.attr) <- element.names    
+    res <- rep(list(res.attr), length(vertex.attr))
+    names(res) <- vertex.attr
     
     # compute D if not input
     if (is.null(D)) {
