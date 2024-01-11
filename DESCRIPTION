@@ -7,7 +7,7 @@ Authors@R: person("Alex", "Cornish", role = c("cre","aut"),
 Date: 6 October 2021
 Imports: graphics, Matrix, methods, stats
 Depends: R (>= 4.1), igraph
-Suggests: BiocGenerics, BioNet, DLBCL, formatR, knitr, msm, org.Sc.sgd.db, markdown, rmarkdown, RUnit
+Suggests: BiocGenerics, BioNet, formatR, knitr, msm, org.Sc.sgd.db, markdown, rmarkdown, RUnit
 Description: This package provides methods for measuring the strength of association between a network and a phenotype. It does this by measuring clustering of the phenotype across the network (Knet). Vertices can also be individually ranked by their strength of association with high-weight vertices (Knode).
 License: GPL (>= 2)
 LazyLoad: yes
