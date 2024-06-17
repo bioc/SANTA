@@ -7,7 +7,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-````{setup, echo=FALSE}
+```{setup, echo=FALSE}
 options(width = 75)
 options(useFancyQuotes=FALSE)
 
