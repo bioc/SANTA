@@ -1,10 +1,10 @@
 Package: SANTA
 Type: Package
 Title: Spatial Analysis of Network Associations
-Version: 2.41.0
+Version: 2.41.1
 Authors@R: person("Alex", "Cornish", role = c("cre","aut"),
              email = "alex.cornish@icr.ac.uk")
-Date: 11 January 2024
+Date: 17 June 2024
 Imports: graphics, Matrix, methods, stats
 Depends: R (>= 4.1), igraph
 Suggests: BiocGenerics, BioNet, formatR, knitr, msm, org.Sc.sgd.db, markdown, rmarkdown, RUnit
